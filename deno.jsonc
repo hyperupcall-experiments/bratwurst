@@ -1,9 +1,15 @@
 {
+	"imports": {
+		"~/lib": "./lib.ts",
+		"valibot": "npm:valibot@1.1.0",
+		"preact": "./examples/10-simple/dependencies/preact@10.26.9.js",
+	},
+	"workspace": ["./examples/*"],
 	"fmt": {
 		"useTabs": true,
 		"lineWidth": 100,
 		"indentWidth": 3,
 		"semiColons": false,
-		"singleQuote": true
-	}
+		"singleQuote": true,
+	},
 }

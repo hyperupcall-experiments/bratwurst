@@ -1,7 +1,8 @@
-import { serveFile } from 'jsr:@std/http/file-server'
-import tsBlankSpace from 'npm:ts-blank-space'
-import * as path from 'jsr:@std/path'
-import { expandGlob } from 'jsr:@std/fs/expand-glob'
+import { SearchParams } from '~/lib'
+import { appRouter } from './examples/20-data-dynamic/routes.ts'
+import { expandGlob, fs, jsonc, path, renderToString, serveFile, tsBlankSpace } from './mod.ts'
+
+const { h } = await import( './examples/30-routes/exports.ts')
 
 const Backends = await getPageBackends()
 
@@ -17,12 +18,12 @@ export async function requestHandler(req: Request) {
 	switch (url.pathname) {
 		case '/':
 			if (req.method === 'GET') {
-				return await renderPage('~/pages/index.ts', {
-					layout: '~/layouts/default.ts',
+				return await renderPage(url, './pages/index.ts', {
+					layout: './layouts/default.ts',
 				})
 			}
 			if (req.method === 'POST') {
-				return await getPageData('~/pages/index.ts')
+				return await getPageData(url, './pages/index.ts')
 			}
 	}
 
@@ -48,11 +49,25 @@ export async function requestHandler(req: Request) {
 			})
 		}
 	}
+	if (
+		req.method === 'GET' &&
+		(url.pathname === '/lib.ts' || url.pathname === '/trpc.ts')
+	) {
+		if (!import.meta.dirname) throw TypeError('Bad import.meta.dirname')
+		const tsFile = path.join(import.meta.dirname, url.pathname)
+		const text = await Deno.readTextFile(tsFile)
+		const output = tsBlankSpace(text)
+		return new Response(output, {
+			headers: {
+				'Content-Type': 'application/javascript',
+			},
+		})
+	}
 
 	// Serve static files.
 	{
 		if (!import.meta.dirname) throw TypeError('Bad import.meta.dirname')
-		const staticDir = path.join(import.meta.dirname, '..', 'static')
+		const staticDir = path.join(Deno.cwd(), 'static')
 		const filepath = path.join(staticDir, url.pathname)
 		if (!filepath.startsWith(staticDir)) {
 			throw new Error('Bad path')
@@ -68,26 +83,43 @@ export async function requestHandler(req: Request) {
 		}
 	}
 
+	// RPC.
+	if (req.method === 'POST' && url.pathname === '/rpc') {
+		const json = await req.json()
+		const result = await appRouter[json.fn].resolve(json.data ?? {})
+
+		return new Response(JSON.stringify(result, null, '\t'), {
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
+	}
+
 	// Serve 404 page.
 	return new Response('404: Not Found', {
 		status: 404,
 	})
 }
 
-async function renderPage(pagepath: string, options: { layout: string }) {
-	const serverpath = pagepath.replace(/\.(t|j)s$/u, '.server.$1s')
+async function renderPage(url: URL, pagepath: string, options: { layout: string }) {
+	const pagepathabs = path.join(Deno.cwd(), pagepath)
+
+	const serverpath = pagepathabs.replace(/\.(t|j)s$/u, '.server.$1s')
 	const [PageResult, ServerResult] = await Promise.allSettled([
-		import(pagepath),
+		import(pagepathabs),
 		import(serverpath),
 	])
 
 	if (PageResult.status === 'rejected') {
-		return new Response(`Failed to find page: "${pagepath}"\n${PageResult.reason}\n`, {
-			status: 404,
-			headers: {
-				'Content-Type': 'text/plain',
+		return new Response(
+			`Failed to find page: "${pagepath}"\n${PageResult.reason}\n`,
+			{
+				status: 404,
+				headers: {
+					'Content-Type': 'text/plain',
+				},
 			},
-		})
+		)
 	}
 	if (typeof PageResult.value?.Page !== 'function') {
 		return new Response(`No "Page" function found in file: "${pagepath}"`, {
@@ -98,20 +130,28 @@ async function renderPage(pagepath: string, options: { layout: string }) {
 		})
 	}
 
-	const imports = JSON.parse(await Deno.readTextFile('./deno.jsonc')).imports
+	const imports = jsonc.parse(await Deno.readTextFile('./deno.jsonc')).imports
 	for (const id in imports) {
 		if (imports[id].startsWith('./')) {
 			imports[id] = imports[id].slice(1)
 		}
 	}
 
-	const layoutFile = options.layout ? options.layout : '~/layouts/default.ts'
-	const layoutFn = (await import(layoutFile)).Layout
+	const layoutFile = options.layout ? options.layout : './examples/10-simple/layouts/default.ts'
+	let layoutFn = null
+	if (await fs.exists(layoutFile)) {
+		layoutFn = (await import(layoutFile)).Layout
+	} else {
+		layoutFn = defaultLayoutFn
+	}
+
 	const text = layoutFn(
+		url,
 		pagepath,
 		PageResult.value.Page,
-		JSON.stringify(imports, null, '\t'),
-		ServerResult.status === 'fulfilled' ? ((await ServerResult.value?.PageData?.()) ?? {}) : {},
+		imports,
+		ServerResult.status === 'fulfilled' ? ((await ServerResult.value?.Data?.()) ?? {}) : {},
+		ServerResult.status === 'fulfilled' ? ((await ServerResult.value?.Head?.()) ?? '') : '',
 	)
 
 	return new Response(text, {
@@ -121,14 +161,23 @@ async function renderPage(pagepath: string, options: { layout: string }) {
 	})
 }
 
-async function getPageData(pagepath: string) {
-	const serverpath = pagepath.replace(/\.(t|j)s$/u, '.server.ts')
-	const fn = (await import(serverpath)).PageData
-	return new Response(JSON.stringify(await fn()), {
-		headers: {
-			'Content-Type': 'application/json',
-		},
-	})
+async function getPageData(url: URL, pagepath: string) {
+	const pagepathabs = path.join(Deno.cwd(), pagepath)
+	const serverpath = pagepathabs.replace(/\.(t|j)s$/u, '.server.ts')
+	if (await fs.exists(serverpath)) {
+		const fn = (await import(serverpath)).Data
+		return new Response(JSON.stringify({ data: await fn(url) }), {
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
+	} else {
+		return new Response('{}', {
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
+	}
 }
 
 async function getPageBackends(): Promise<
@@ -152,4 +201,56 @@ async function getPageBackends(): Promise<
 	}
 
 	return backends
+}
+
+export function defaultLayoutFn(url: URL, pagePath, Page, imports, serverData, serverHead) {
+	const searchParams = new SearchParams(url)
+	const content = renderToString(h(() => Page(serverData, searchParams), {}))
+	if (imports['~/lib']) {
+		imports['~/lib'] = '/lib.ts'
+	}
+	for (const key in imports) {
+		if (!imports[key].startsWith('/')) {
+			delete imports[key]
+		}
+	}
+	const html = String.raw
+	// deno-fmt-ignore
+	return html`<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<script type="importmap">
+		{
+			"imports": ${JSON.stringify(imports, null ,'\t').replaceAll('\n', '\n\t\t\t')}
+		}
+		</script>
+		<script type="module">
+		import { h, hydrate, render } from "preact";
+		import { SearchParams } from '~/lib'
+		import { Page } from "${pagePath.replace(/^\./, '~')}"
+
+		const searchParams = new SearchParams()
+		fetch(new URL(window.location).pathname, { method: "POST" })
+			.then((res) => res.json())
+			.then((json) => {
+				hydrate(
+					h(() => Page(json.data, searchParams), {}),
+					document.querySelector("body"),
+				);
+			});
+		</script>
+		<!-- Head() start -->
+		${serverHead ? serverHead : ''}
+		<!-- Head() end -->
+		<title>Site</title>
+	</head>
+	<body>
+		${content ? content : ''}
+	</body>
+</html>`
 }

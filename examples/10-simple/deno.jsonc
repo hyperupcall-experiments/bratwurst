@@ -1,0 +1,23 @@
+{
+	"tasks": {
+		"dev": "../../cli.ts serve",
+	},
+	"fmt": {
+		"useTabs": true,
+		"lineWidth": 100,
+		"indentWidth": 3,
+		"semiColons": false,
+		"singleQuote": true,
+	},
+	"imports": {
+		"valibot": "./dependencies/valibot@1.1.0.js",
+		"htm": "./dependencies/htm@3.1.1.js",
+		"htm/preact": "./dependencies/htm-preact@3.1.1.js",
+		"preact": "./dependencies/preact@10.26.9.js",
+		"~/components/": "./components/",
+		"~/layouts/": "./layouts/",
+		"~/pages/": "./pages/",
+		"~/utilities/": "./utilities/",
+		"~/lib": "../../lib.ts",
+	},
+}
