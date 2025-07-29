@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run --watch-hmr --allow-all
+#!/usr/bin/env -S deno run --config ./deno.jsonc --watch-hmr --watch-exclude=./dependencies/ --allow-all
 import { jsonc, parseArgs, path } from './mod.ts'
 import { nodeResolve } from 'npm:@rollup/plugin-node-resolve'
 import { rollup } from 'npm:rollup'
@@ -189,7 +189,7 @@ async function commandBundle() {
 	const importMap = jsonc.parse(await Deno.readTextFile(path.join(Deno.cwd(), './deno.jsonc')))
 
 	await fs.mkdir('./static', { recursive: true })
-	await bundleDependencies(importMap, './dependencies')
+	await bundleDependencies(importMap.imports, './dependencies')
 }
 
 // Check if all entries in importMap have been used
@@ -266,17 +266,17 @@ export async function watchBundleDependencies(
 }
 
 export async function bundleDependencies(
-	importMap: { imports: Record<string, string> },
+	importMap: Record<string, string>,
 	staticDir: string,
 ) {
 	const rollupInput = {} as Record<string, string>
 	for (
-		let [packageNameAndDir, uri] of Object.entries(
-			importMap.imports as Record<string, string>,
+		const [packageNameAndDir, uri] of Object.entries(
+			importMap as Record<string, string>,
 		)
 	) {
 		if (!uri.startsWith('./dependencies/') && !uri.startsWith('dependencies/')) {
-			break
+			continue
 		}
 
 		const version = uri.match(
@@ -291,6 +291,7 @@ export async function bundleDependencies(
 			throw new Error('no package version')
 		}
 
+		// TODO: xdg base dir
 		const importPath = path.join(
 			os.homedir(),
 			'.cache/deno/npm/registry.npmjs.org',

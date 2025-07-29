@@ -1,10 +1,10 @@
-import { SearchParams } from '~/lib'
 import { appRouter } from './examples/20-data-dynamic/routes.ts'
-import { expandGlob, fs, jsonc, path, renderToString, serveFile, tsBlankSpace } from './mod.ts'
-
-const { h } = await import( './examples/30-routes/exports.ts')
+import { expandGlob, fs, jsonc, path, serveFile, tsBlankSpace } from './mod.ts'
+import { h } from 'preact'
+import { renderToString } from 'preact-render-to-string'
 
 const Backends = await getPageBackends()
+const { SearchParams } = await import(path.join(import.meta.dirname, './lib.ts'))
 
 /**
  * There are five directories:
@@ -63,10 +63,36 @@ export async function requestHandler(req: Request) {
 			},
 		})
 	}
+	for (const slug of ['dependencies']) {
+		if (url.pathname.startsWith(`/${slug}`)) {
+			const filepath = path.join(Deno.cwd(), url.pathname)
+			// if (!filepath.startsWith(staticDir)) {
+			// 	throw new Error('Bad path')
+			// }
+			const stat = await Deno.stat(filepath).catch((err) => {
+				if (err instanceof Deno.errors.NotFound) return null
+				throw err
+			})
+			if (stat) {
+				// if (filepath.endsWith('.ts')) {
+				// 	const text = await Deno.readTextFile(filepath)
+				// 	const output = tsBlankSpace(text)
+				// 	return new Response(output, {
+				// 		headers: {
+				// 			'Content-Type': 'application/javascript',
+				// 		},
+				// 	})
+				// } else {
+				return serveFile(req, filepath, {
+					fileInfo: stat,
+				})
+				// }
+			}
+		}
+	}
 
 	// Serve static files.
 	{
-		if (!import.meta.dirname) throw TypeError('Bad import.meta.dirname')
 		const staticDir = path.join(Deno.cwd(), 'static')
 		const filepath = path.join(staticDir, url.pathname)
 		if (!filepath.startsWith(staticDir)) {
@@ -137,7 +163,7 @@ async function renderPage(url: URL, pagepath: string, options: { layout: string 
 		}
 	}
 
-	const layoutFile = options.layout ? options.layout : './examples/10-simple/layouts/default.ts'
+	const layoutFile = options.layout ?? './examples/10-simple/layouts/default.ts'
 	let layoutFn = null
 	if (await fs.exists(layoutFile)) {
 		layoutFn = (await import(layoutFile)).Layout
@@ -250,7 +276,7 @@ export function defaultLayoutFn(url: URL, pagePath, Page, imports, serverData, s
 		<title>Site</title>
 	</head>
 	<body>
-		${content ? content : ''}
+		${content ?? ''}
 	</body>
 </html>`
 }

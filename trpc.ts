@@ -1,4 +1,4 @@
-import { z } from 'npm:zod'
+import { z } from 'zod'
 
 export type ProcedureResolver<TInput, TOutput, TContext> = (opts: {
 	input: TInput

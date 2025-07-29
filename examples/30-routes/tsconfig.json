@@ -1,0 +1,7 @@
+{
+	"compilerOptions": {
+		"paths": {
+			"~/lib": ["/home/edwin/Documents/Code/bratwurst/lib.ts"]
+		}
+	}
+}

@@ -1,7 +1,8 @@
 import * as v from 'valibot'
 
-export class SearchParams<T extends Record<string, string>> {
+export class SearchParams<T extends string[]> {
 	url: URL
+
 	constructor(url?: URL) {
 		this.url = url
 	}

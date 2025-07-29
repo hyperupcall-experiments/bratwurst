@@ -10,15 +10,15 @@
 		"singleQuote": true,
 	},
 	"imports": {
+		"~/lib": "../../lib.ts",
 		"valibot": "./dependencies/valibot@1.1.0.js",
 		"htm": "./dependencies/htm@3.1.1.js",
 		"htm/preact": "./dependencies/htm-preact@3.1.1.js",
 		"preact": "./dependencies/preact@10.26.9.js",
-		"zod": "npm:zod@^4.0.2",
+		"zod": "./dependencies/zod@4.0.2.js",
 		"~/components/": "./components/",
 		"~/layouts/": "./layouts/",
 		"~/pages/": "./pages/",
 		"~/utilities/": "./utilities/",
-		"~/lib": "../../lib.ts",
 	},
 }

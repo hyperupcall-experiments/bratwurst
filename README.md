@@ -1,10 +1,10 @@
-# bratwurst
+# Bratwurst
 
-A yummy, minimal, metaframework for web devlopment.
+A yummy, minimal, web framework.
 
 ## Summary
 
-Built on [Deno](https://deno.com) and [Preact](https://preactjs.com), praxis empowers developers to build web applications that use the platform, without the complexity of popular metaframeworks.
+Built on [Deno](https://deno.com) and [Preact](https://preactjs.com), Bratwurst empowers developers to build web applications that use the platform without the complexity of popular metaframeworks.
 
 ## Features
 
@@ -12,16 +12,15 @@ Built on [Deno](https://deno.com) and [Preact](https://preactjs.com), praxis emp
 - SSR (server-side rendering)
 - Fully-typed & validating `getStaticProps`-like API
 - Fully-typed & validating `trpc`-like API
+- Fully typed `URLSearchParams`-like API (TODO: validate)
 
 ### Roadmap?
 
-- File-based routing
+- Websockets
 - Layouts
 - File-based routing
-- Fully typed `URLSearchParams`-like API
-- SSG (server-side generation)
-- ISR (incremental static regeneration)
 - Great error feedback
+- Remove zod mixup
 
 ### API
 

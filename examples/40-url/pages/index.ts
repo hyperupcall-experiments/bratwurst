@@ -1,11 +1,11 @@
 import { html } from 'htm/preact'
 import type { DataSchema } from './index.server.ts'
 import { inferParams, inferProps } from '~/lib'
-import * as v from 'npm:valibot'
+import * as v from 'valibot'
 
 export function UrlParamSchema() {
 	return v.object({
-		background: v.string(),
+		color: v.string(),
 	})
 }
 
@@ -14,6 +14,6 @@ export function Page(
 	params: inferParams<typeof UrlParamSchema>,
 ) {
 	return html`
-		<h1>Background color: ${params.get('background')}</h1>
+		<h1>Color: ${params.get('color')}</h1>
 	`
 }

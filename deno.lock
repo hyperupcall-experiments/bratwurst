@@ -19,10 +19,9 @@
     "npm:@typescript-eslint/typescript-estree@*": "8.32.0_typescript@5.8.3",
     "npm:jsonc-parser@^3.3.1": "3.3.1",
     "npm:preact-render-to-string@*": "6.5.13_preact@10.26.9",
+    "npm:preact-render-to-string@^6.5.13": "6.5.13_preact@10.26.9",
     "npm:rollup@*": "4.40.2",
     "npm:ts-blank-space@~0.6.1": "0.6.1",
-    "npm:valibot@*": "1.1.0",
-    "npm:valibot@1.1.0": "1.1.0",
     "npm:valibot@^1.1.0": "1.1.0",
     "npm:zod@*": "3.24.4",
     "npm:zod@^4.0.2": "4.0.2"
@@ -556,9 +555,6 @@
     "https://esm.sh/v135/zod@4.0.1/es2022/zod.mjs": "a3874e99a5fcc82936a6d963b3882933688051c5d917bd456dc62c8db11130e1"
   },
   "workspace": {
-    "dependencies": [
-      "npm:valibot@1.1.0"
-    ],
     "members": {
       "examples/20-data-dynamic": {
         "dependencies": [
