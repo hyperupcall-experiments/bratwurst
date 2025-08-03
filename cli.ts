@@ -53,7 +53,6 @@ async function commandInit() {
 		Deno.mkdir('./components', { recursive: true }),
 		Deno.mkdir('./layouts', { recursive: true }),
 		Deno.mkdir('./pages', { recursive: true }),
-		Deno.mkdir('./static', { recursive: true }),
 		Deno.mkdir('./utilities', { recursive: true }),
 		Deno.writeTextFile(
 			'./deno.jsonc',
@@ -188,7 +187,6 @@ async function commandBundle() {
 	// }
 	const importMap = jsonc.parse(await Deno.readTextFile(path.join(Deno.cwd(), './deno.jsonc')))
 
-	await fs.mkdir('./static', { recursive: true })
 	await bundleDependencies(importMap.imports, './dependencies')
 }
 

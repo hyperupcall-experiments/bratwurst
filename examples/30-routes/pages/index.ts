@@ -1,19 +1,20 @@
-import { html } from "htm/preact";
-import type { DataSchema } from "./index.server.ts";
-import { inferProps, rpc } from "~/lib";
-import { useEffect, useState } from "preact/hooks";
+import { html } from "htm/preact"
+import type { DataSchema } from "./index.server.ts"
+import { inferProps } from "~/lib"
+import { rpc } from "~/api"
+import { useEffect, useState } from "preact/hooks"
 
 export function Page({
 	message: messageDefault,
 }: inferProps<typeof DataSchema>) {
-	const [message, setMessage] = useState(messageDefault);
+	const [message, setMessage] = useState(messageDefault)
 	useEffect(() => {
-		const aborter = new AbortController();
+		const aborter = new AbortController()
 		rpc.getMessage().then((text: string) => {
-			setMessage(text);
-		});
-		return aborter.abort;
-	}, []);
+			setMessage(text)
+		})
+		return aborter.abort
+	}, [])
 
-	return html` <h1>${message}</h1> `;
+	return html` <h1>${message}</h1> `
 }

@@ -1,4 +1,5 @@
 import * as v from 'valibot'
+import { html } from 'htm/preact'
 
 export class SearchParams<T extends string[]> {
 	url: URL
@@ -77,6 +78,29 @@ export type inferParams<T extends (...args: any[]) => any> = SearchParams<
 	v.InferInput<ReturnType<T>>
 >
 
+export const ITemplate = null
+export type ITemplate = {
+	headTags: string
+	layout: string
+}
+
+export const ILayout = null
+export type ILayout = {
+	page: string
+}
+
+export type IClient = {
+	URLParamSchema?: () => void
+	Layout?: () => void
+	Page: () => void
+}
+
+export type IServer = {
+	Head?: () => Promise<string>
+	DataSchema?: () => Promise<v.AnySchema>
+	Data?: () => Promise<Record<PropertyKey, unknown>>
+}
+
 type ProxyProcedure<TProcedure> = TProcedure extends {
 	// deno-lint-ignore no-explicit-any
 	resolve: (...args: any[]) => any
@@ -87,7 +111,7 @@ type ProxyProcedure<TProcedure> = TProcedure extends {
 		[K in keyof TProcedure]: ProxyProcedure<TProcedure[K]>
 	}
 
-function createTRPCClient(): ProxyProcedure<AppRouter> {
+export function createRPCClient<api>(): ProxyProcedure<api> {
 	const createRecursiveProxy = (path: string[] = []): any => {
 		return new Proxy(() => {}, {
 			get(_target, prop) {
@@ -134,8 +158,46 @@ function createTRPCClient(): ProxyProcedure<AppRouter> {
 	return createRecursiveProxy()
 }
 
-export const rpc = createTRPCClient()
+export type ProcedureResolver<TInput, TOutput, TContext> = (opts: {
+	input: TInput
+	ctx: TContext
+}) => Promise<TOutput>
 
-export function throwBadMeta(property: string): never {
-	throw new Error(`Bad value for "import.meta.${property}"`)
+export type MyContext = {
+	userId?: string
+	db: string
+}
+
+export type Procedure<TInput, TOutput, TContext> = {
+	input?: v.InferInput<TInput>
+	output?: v.InferInput<TOutput>
+	resolve: ProcedureResolver<TInput, TOutput, TContext>
+}
+
+export function createTRPCBuilder<TContext>() {
+	return {
+		procedure<TInput = any, TOutput = any>(
+			def: Procedure<TInput, TOutput, TContext>,
+		): Procedure<TInput, TOutput, TContext> {
+			return {
+				input: def.input,
+				resolve: def.resolve,
+			}
+		},
+		router<T>(procedures: T): T {
+			return procedures
+		},
+	}
+}
+
+export const t = createTRPCBuilder<MyContext>()
+
+export function renderLayout(Page, Layout, serverData, searchParams) {
+	if (Layout) {
+		return html`
+			<${Layout} page="${Page(serverData, searchParams)}" />
+		`
+	} else {
+		return Page(serverData, searchParams)
+	}
 }

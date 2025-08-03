@@ -8,21 +8,20 @@ Built on [Deno](https://deno.com) and [Preact](https://preactjs.com), Bratwurst 
 
 ## Features
 
-- Minimal
+- Minimal & simple
 - SSR (server-side rendering)
 - Fully-typed & validating `getStaticProps`-like API
 - Fully-typed & validating `trpc`-like API
 - Fully typed `URLSearchParams`-like API (TODO: validate)
+- Layouts
 
 ### Roadmap?
 
 - Websockets
-- Layouts
 - File-based routing
 - Great error feedback
-- Remove zod mixup
 
 ### API
 
-- Client: `Page(data, url)`
-- Server: `DataSchema()`, `Data()`
+- Client: `URLParamSchema()`, `Page(data, params)`
+- Server: `Head()`, `DataSchema()`, `Data()`

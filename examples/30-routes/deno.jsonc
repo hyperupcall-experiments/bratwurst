@@ -1,13 +1,13 @@
 {
 	"tasks": {
-		"dev": "../../cli.ts serve",
+		"dev": "../../cli.ts serve"
 	},
 	"fmt": {
 		"useTabs": true,
 		"lineWidth": 100,
 		"indentWidth": 3,
 		"semiColons": false,
-		"singleQuote": true,
+		"singleQuote": true
 	},
 	"imports": {
 		"~/lib": "/home/edwin/Documents/Code/bratwurst/lib.ts",
@@ -17,10 +17,10 @@
 		"preact": "./dependencies/preact@10.26.9.js",
 		"preact/hooks": "./dependencies/preact-hooks@10.26.9.js",
 		"preact-render-to-string": "./dependencies/preact-render-to-string@6.5.13.js",
-		"zod": "./dependencies/zod@4.0.2.js",
 		"~/components/": "./components/",
 		"~/layouts/": "./layouts/",
 		"~/pages/": "./pages/",
 		"~/utilities/": "./utilities/",
-	},
+		"~/api": "./api.ts"
+	}
 }

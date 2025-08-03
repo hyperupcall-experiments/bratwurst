@@ -16,7 +16,6 @@
 		"htm/preact": "./dependencies/htm-preact@3.1.1.js",
 		"preact": "./dependencies/preact@10.26.9.js",
 		"preact-render-to-string": "./dependencies/preact-render-to-string@6.5.13.js",
-		"zod": "./dependencies/zod@4.0.2.js",
 		"~/components/": "./components/",
 		"~/layouts/": "./layouts/",
 		"~/pages/": "./pages/",

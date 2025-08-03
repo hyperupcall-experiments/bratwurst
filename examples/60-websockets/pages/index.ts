@@ -1,9 +1,5 @@
 import { html } from 'htm/preact'
 
-// export const URLParamSchema = null
-
-// export const Page = null
-
 export function Page() {
 	return html`
 		<h1>Hello, World!</h1>

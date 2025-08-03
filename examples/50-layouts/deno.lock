@@ -17,7 +17,8 @@
     "npm:@typescript-eslint/typescript-estree@*": "8.36.0_typescript@5.8.3",
     "npm:jsonc-parser@^3.3.1": "3.3.1",
     "npm:rollup@*": "4.44.2",
-    "npm:ts-blank-space@~0.6.1": "0.6.1"
+    "npm:ts-blank-space@~0.6.1": "0.6.1",
+    "npm:valibot@*": "1.1.0"
   },
   "jsr": {
     "@std/cli@1.0.20": {
@@ -459,6 +460,9 @@
     "typescript@5.8.3": {
       "integrity": "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==",
       "bin": true
+    },
+    "valibot@1.1.0": {
+      "integrity": "sha512-Nk8lX30Qhu+9txPYTwM0cFlWLdPFsFr6LblzqIySfbZph9+BFsAHsNvHOymEviUepeIW6KFHzpX8TKhbptBXXw=="
     }
   }
 }
